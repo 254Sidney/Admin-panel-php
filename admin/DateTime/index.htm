@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+	
+		<title>Format - Data Attributes</title>
+		<link rel="stylesheet" type="text/css" href="css/DateTimePicker.css" />
+		<script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+		<script type="text/javascript" src="js/DateTimePicker.js"></script>
+	
+		<!--[if lt IE 9]>
+			<link rel="stylesheet" type="text/css" href="../src/DateTimePicker-ltie9.css" />
+			<script type="text/javascript" src="../src/DateTimePicker-ltie9.js"></script>
+		<![endif]-->
+
+<!-->
+	$('[data-field="datetime"]').closest('table').after('<div id="dtBox"></div>');
+	$('#dtBox').DateTimeOmnix();
+<!-->
+	
+	
+		<style type="text/css">
+		
+			p
+			{
+				margin-left: 20px;
+			}
+		
+			input
+			{
+				width: 200px;
+				padding: 10px;
+				margin-left: 20px;
+				margin-bottom: 20px;
+			}
+		
+		</style>
+	
+	</head>
+
+	<body>
+	
+		<p>DateTime : </p>
+		<input type="text" data-field="datetime" data-format="yyyy/MM/dd hh:mm:ss AA" >
+		<div id="dtBox"></div>
+	
+		<script type="text/javascript">
+		
+			$(document).ready(function()
+			{
+				$("#dtBox").DateTimeOmnix();
+			});
+		
+		</script>
+	
+	</body>
+
+</html>
