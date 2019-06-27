@@ -531,7 +531,7 @@ if (isset($_POST['submitrecords'])) {
 
 		//end of build the genric submit query
 		@$excute_submit_query = mysqli_query($con,@$submit_query);
-		if(!mysqli_query($con,@$submit_query)){
+		if(!@$excute_submit_query){
 		 	  mysqli_error();
 		}else{
 			echo "<script>
