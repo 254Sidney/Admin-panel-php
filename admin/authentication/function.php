@@ -708,11 +708,11 @@ $OrginalDataType = QueryResult($con,"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WH
     }
 //define varibal to get the ids for each tables columns  and store it in session 
 $primrykeyname = mysqli_fetch_field_direct($columinfo, 0)->name; 
-$tableObject['FieldType']           = $fieldtype;
-$tableObject['OrginalFieldType']    = $orginalfieldtype;
-$tableObject['FieldsName']          = $fieldsname;
-$tableObject['primrykeyname']       = $primrykeyname;
-$tableObject['columnnumber']        = $columnnumber;
+$tableObject['FieldType']           = @$fieldtype;
+$tableObject['OrginalFieldType']    = @$orginalfieldtype;
+$tableObject['FieldsName']          = @$fieldsname;
+$tableObject['primrykeyname']       = @$primrykeyname;
+$tableObject['columnnumber']        = @$columnnumber;
 
 return $tableObject;
 
