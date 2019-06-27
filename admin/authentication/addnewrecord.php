@@ -471,7 +471,7 @@ if (isset($_POST['submitrecords'])) {
 			//append all values with the files post 
 			foreach ($_FILES as $key => $value) {
 				if ($key != 'submitrecords') {
-					$value = mysqli_real_escape_string($value['name']);	
+					$value = mysqli_real_escape_string($con,$value['name']);	
 					if (preg_match('/_coverimage/',$key)){
 						$key   = str_replace('_coverimage', '', $key);
 						//convert to blob 
