@@ -12,7 +12,7 @@ Introduction
   <h1>Introduction</h1>
   
 
-The PHP Admin panel (PAP) is a free open source project bullied for PHP developer in order to produce time and effort during development cycle  
+The PHP Admin panel (PAP) is a free open source project bullied for PHP developer in order to reduce time and efforts during development cycle  
 
 This Version counted as V 0 which mean that you can modify and customize as what fits you and feel free to update us with any suggestion or enhancement. 
 
