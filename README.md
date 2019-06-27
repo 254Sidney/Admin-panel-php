@@ -19,6 +19,7 @@ This Version counted as V 0 which mean that you can modify and customize as what
 <h3>Browser Requirements </h3>
 
     •	PHP 7.0.0
+    •	mysql
   
   The Admin Panel will work with the following browsers: 
   
