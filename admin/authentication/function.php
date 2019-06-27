@@ -181,7 +181,7 @@ function GetUserInfo($con){
         for ($i=0; $i < $cloumnnumber ; $i++) { 
             $fieldname =  $coulmtype['FieldsName'][$i];
 
-            if(preg_match('/'.$images.'/',$fieldname)){
+            if(preg_match('/'.$images.'/',$fieldname) || preg_match('/image/',$fieldname)){
                 @$userimagename = $userrow[$i];
                 @$imagefieldtype = $coulmtype['OrginalFieldType'][$i];
             }else if($coulmtype['OrginalFieldType'][$i] == 'blob' && $coulmtype['FieldType'][$i] != 'text'){

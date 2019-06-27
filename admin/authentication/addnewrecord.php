@@ -247,7 +247,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
                         	echo "</div>
 							   </div>";
 
-                }else if(preg_match('/'.$images.'/',$colum_submit_name[$i])){
+                }else if(preg_match('/'.$images.'/',$colum_submit_name[$i]) || preg_match('/image/',$colum_submit_name[$i])){
 						 //same code for the blob type but we check for the name incase the type is not blob                    
 							echo "<div class='form-group'>
 								<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_submit_name[$i]."</label>
