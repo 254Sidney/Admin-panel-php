@@ -108,7 +108,7 @@ This Version counted as V 0 which mean that you can modify and customize as what
    
    
    
-   <h3> For any inquiry please contact me direct to the below contacts or just leave a coment </h3>
+   <h3> For any inquiry please contact me direct to the below contacts . </h3>
    <h4> Developed  By - Ali Alroomi</h3>
    <h4> mobile: 00962799279272</h4>
    <a href="mailto:alialroomi2009@gmail.com" > email: alialroomi2009@gmail.com</a>
