@@ -567,7 +567,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                        echo "<a id='displayrelatedrecords' onclick=\"window.open('authentication/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
                     }
                     $limtbuttonrepeat++;
-                    $PK_Name_For_FK = end( explode( ".", $FK[$prima] ) );
+                    $PK_Name_For_FK = @end( explode( ".", $FK[$prima] ) );
                     $FKNAME = $coulmtype['FieldsName'][$i];
                     $PK_Value_For_FK  = $rowvalue[$i];
                      if(!empty($Forgien_Key_Display_Field)){
