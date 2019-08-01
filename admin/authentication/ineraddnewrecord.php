@@ -50,6 +50,10 @@
 				width: 60%;
 
 			}
+
+			.btn-primary {
+				margin-top: 15px;
+			}
         </style>
 
           <script type="text/javascript">	
@@ -68,7 +72,7 @@
 
 <?php
 //include main library 
-include 'function.php';
+include 'inerfunction.php';
 include 'FK_Config.php';
 
 
@@ -87,16 +91,19 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 	@$colum_submit_name_no_replace  =   $table_submit_info['FieldsName'];
 	@$colum_submit_name     		=  str_replace('_', ' ', $table_submit_info['FieldsName']);
 	@$colum_submit_type     		=  $table_submit_info['FieldType'];
-	@$colum_submit_orginaltype      = $table_submit_info['OrginalFieldType'];
+	@$colum_submit_orginaltype      =  $table_submit_info['OrginalFieldType'];
 	@$colum_submit_number   		=  $table_submit_info['columnnumber'];
 
+	$fkfieldname   					= mysqli_real_escape_string($con,$_GET['fkfieldname']);
+	$relatedid						= mysqli_real_escape_string($con,$_GET['relatedid']);
+
 	//get all config info if exsist 
-	@$confObj = CheckconfigInfo($con);
+	@$confObj = CheckconfigInfo();
 	//prepare the variables for youtube and viedo and images 
     if(count($confObj) > 0){
 
         if($confObj['fieldname_image'] != ''){
-            $images  = str_replace('_', '', $confObj['fieldname_image']);
+            $images  = str_replace('_', ' ', $confObj['fieldname_image']);
         }else{
             $images  = 'Image'; 
         }
@@ -106,7 +113,6 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
         }else{
             $password   = 'Password';
         }
-        
 
         if($confObj['uploaddirectory'] != ''){
             $uploads  = $confObj['uploaddirectory'];
@@ -115,22 +121,22 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
         }
 
         if($confObj['youtubefieldname'] != ''){
-            $youtube = str_replace('_', '', $confObj['youtubefieldname']);
+            $youtube = str_replace('_', ' ', $confObj['youtubefieldname']);
         }else{
             $youtube = 'YouTube';
         }
 
         if($confObj['viedofieldname'] != ''){
-            $viedo   = str_replace('_', '', $confObj['viedofieldname']);
+            $viedo   = str_replace('_', ' ', $confObj['viedofieldname']);
         }else{
             $viedo   = 'Video';
         }
 
     }else{
-        $youtube 	= 'YouTube';
-        $viedo   	= 'Video';
-        $images  	= 'Image';  
-        $uploads  	= 'uploads/'; 
+        $youtube = 'YouTube';
+        $viedo   = 'Video';
+        $images  = 'Image';  
+        $uploads  = 'Uploads/';  
         $password   = 'Password';
     }
 	//draw the submit form 
@@ -180,7 +186,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 
                     	}else{
 
-                    		$FK_Value_Query  = mysqli_query($con,"SELECT * FROM  $Tablename_FK  ");
+                    		$FK_Value_Query  = mysqli_query("SELECT * FROM  $Tablename_FK  ");
 		    				//append the dropdown list 
 		    				 echo "<div class='form-group' >
 									<label for='input-rounded' class='col-sm-2 control-label'>".$colum_submit_name[$i]."</label>
@@ -247,7 +253,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
                         	echo "</div>
 							   </div>";
 
-                }else if(preg_match('/'.$images.'/i',$colum_submit_name[$i]) || preg_match('/image/',$colum_submit_name[$i])){
+                }else if(preg_match('/'.$images.'/i',$colum_submit_name[$i])){
 						 //same code for the blob type but we check for the name incase the type is not blob                    
 							echo "<div class='form-group'>
 								<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_submit_name[$i]."</label>
@@ -303,7 +309,6 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 
 
                     }else{   //check fields by type 
-
 
                     	if(@$colum_submit_type[$i] == 'text'){
 							echo "<div class='form-group' >
@@ -426,7 +431,6 @@ if (isset($_POST['submitrecords'])) {
 	//check if image exsist
 
 	    if(!empty(isset($_FILES)) && $file_length != 0){
-
 	    	//append all fields with the post fields 
 			foreach ($_POST as $key => $value) {
 				if ($key != 'submitrecords') {					
@@ -436,11 +440,10 @@ if (isset($_POST['submitrecords'])) {
 			//append all fields with the files fields 
 			foreach ($_FILES as $key => $value) {
 				if ($key != 'submitrecords') {
-
-					if (preg_match('/_coverimage/',$key)){
+					if (preg_match('/_coverimage/i',$key)){
 						$key   = str_replace('_coverimage', '', $key);
 				 		//end of convert to blob
-					}else if(preg_match('/_uploadcoverimage/',$key)){
+					}else if(preg_match('/_uploadcoverimage/i',$key)){
 						$key   = str_replace('_uploadcoverimage', '', $key);
 					}
 
@@ -460,11 +463,8 @@ if (isset($_POST['submitrecords'])) {
 				if ($key != 'submitrecords') {	
 						if (preg_match('/'.$password.'/i',$key)){
 							$value = sha1($value);
-							$submit_query .= " '$value' , ";
-						}else{
-							$submit_query .= " '$value' , ";	
 						}			
-									     
+						$submit_query .= " '$value' , ";				     
 				}//end of build query 				
 			}
 
@@ -472,7 +472,7 @@ if (isset($_POST['submitrecords'])) {
 			foreach ($_FILES as $key => $value) {
 				if ($key != 'submitrecords') {
 					$value = mysqli_real_escape_string($con,$value['name']);	
-					if (preg_match('/_coverimage/',$key)){
+					if (preg_match('/_coverimage/i',$key)){
 						$key   = str_replace('_coverimage', '', $key);
 						//convert to blob 
 						if($value !=''){
@@ -480,7 +480,7 @@ if (isset($_POST['submitrecords'])) {
 						 	$value = addslashes($value);
 						}
 				 		//end of convert to blob
-					}else if(preg_match('/_uploadcoverimage/',$key)){
+					}else if(preg_match('/_uploadcoverimage/i',$key)){
 						$key   = str_replace('_uploadcoverimage', '', $key);
 					}
 
@@ -495,6 +495,7 @@ if (isset($_POST['submitrecords'])) {
 			}
 
 	    }else{ //end of if image post 
+
 	    	//append all fields with the query without images fields 
 			foreach ($_POST as $key => $value) {
 				if ($key != 'submitrecords') {
@@ -530,13 +531,13 @@ if (isset($_POST['submitrecords'])) {
 	    }//end of check if image post exsist 
 
 		//end of build the genric submit query
-		@$excute_submit_query = mysqli_query($con,@$submit_query);
-		if(!@$excute_submit_query){
+		@$excute_submit_query = mysqli_query(@$submit_query);
+		if(!mysqli_query($con,@$submit_query)){
 		 	  echo mysqli_error($con);
 		}else{
 			echo "<script>
 					window.opener.location.reload(true);
-					window.opener.location ='../index.php?tablename=$tablename&Submited';
+					window.opener.location ='displayrelatedinfo.php?tablename=$tablename&relatedinfo=$tablename&fkfieldname=$fkfieldname&relatedid=$relatedid&true&Submited';
 			        window.close();
 				 </script>";
 			

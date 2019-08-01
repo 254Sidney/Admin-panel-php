@@ -1,6 +1,6 @@
 <?php
 	  @$Host_Name     = "localhost";
-	  @$DataBase_Name = "beautycenter";
+	  @$DataBase_Name = "vapingyou";
 	  @$user_name     = "root";
 	  @$Password      = "";
 

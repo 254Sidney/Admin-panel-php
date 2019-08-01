@@ -10,27 +10,27 @@ session_start();
 //header( 'Pragma: no-cache' );
 
 //set cookies
-$last = 2592000 + time(); 
+$Month = 2592000 + time(); 
 //$min=600 +time();
 //this adds 30 days to the current time 
-setcookie('AboutVisit', date("F jS - g:i a"), $last);
+setcookie('AboutVisit', date("F jS - g:i a"), $Month);
 ob_start();
 // Return the current page file name
  $current_file = $_SERVER['SCRIPT_NAME'];
 // Returns The Page that we came from
 if (isset($_SERVER['HTTP_REFERER'])) {
-	$http_referer = $_SERVER['HTTP_REFERER'];
+    $http_referer = $_SERVER['HTTP_REFERER'];
 }
 
 
 
 // A Function To Check if the User Is Logged in . 
 // We Did this function here so we can user it everywhere and we dont have to do this long if again
-function LoginTableName($con){
-    $getusertablename = mysqli_query($con,"SELECT `tablename` FROM `userlogin_settings_genericadmin` WHERE `userlogin_id` = '1' ");
+function LoginTableName(){
+    $getusertablename = mysqli_query("SELECT `tablename` FROM `userlogin_settings_genericadmin` WHERE `userlogin_id` = '1' ");
     $usertable        = mysqli_result($getusertablename, 0);  
 
-        return $usertable;	
+        return $usertable;  
 }
 
 
@@ -123,8 +123,8 @@ function QueryResult($con,$query){
     return $query_syntax;
 }
 
-function DisplyTables($con){
-    $AllTables = mysqli_query($con,"show tables"); // run the query and assign the AllTables to $AllTables
+function DisplyTables(){
+    $AllTables = mysqli_query("show tables"); // run the query and assign the AllTables to $AllTables
     $i=0;
     $TablesObj = array();
     while($table = mysqli_fetch_array($AllTables)) { // go through each row that was returned in $AllTables
@@ -137,9 +137,9 @@ function DisplyTables($con){
     }
     return $TablesObj;
 }
-function Tables($con){
-    $tablequery = "show tables";
-    $AllTables = mysqli_query($con,$tablequery); // run the query and assign the AllTables to $AllTables
+
+function Tables(){
+    $AllTables = mysqli_query("show tables"); // run the query and assign the AllTables to $AllTables
     $i=0;
     $TablesObj = array();
     while($table = mysqli_fetch_array($AllTables)) { // go through each row that was returned in $AllTables
@@ -153,18 +153,17 @@ function Tables($con){
     return $TablesObj;
 }
 
-function GetUserInfo($con){
+function GetUserInfo(){
     $userid         = $_SESSION['userid'];
-    $usertablename  = LoginTableName($con);
-    $coulmtype      = GetCoulmsInfo($con,$usertablename);
+    $usertablename  = LoginTableName();
+    $coulmtype      = GetCoulmsInfo($usertablename);
     $primryname     = $coulmtype['FieldsName'][0];
     $username      = $_SESSION['username'];
-    $guestuserinfo  = mysqli_query($con,"SELECT * FROM `$usertablename` WHERE `$primryname` = '$userid' ");
-     
+    $guestuserinfo  = mysqli_query("SELECT * FROM `$usertablename` WHERE `$primryname` = '$userid' ");
     $cloumnnumber = mysqli_num_fields($guestuserinfo);
 
     //get all config info if exsist 
-    @$confObj = CheckconfigInfo($con);
+    @$confObj = CheckconfigInfo();
     //prepare the variables for youtube and viedo and images 
     if(count($confObj) > 0){
         if($confObj['fieldname_image'] != ''){
@@ -180,8 +179,7 @@ function GetUserInfo($con){
     while ($userrow = mysqli_fetch_array($guestuserinfo)) {
         for ($i=0; $i < $cloumnnumber ; $i++) { 
             $fieldname =  $coulmtype['FieldsName'][$i];
-
-            if(preg_match('/'.$images.'/i',$fieldname) || preg_match('/image/',$fieldname)){
+            if(preg_match('/'.$images.'/',$fieldname)){
                 @$userimagename = $userrow[$i];
                 @$imagefieldtype = $coulmtype['OrginalFieldType'][$i];
             }else if($coulmtype['OrginalFieldType'][$i] == 'blob' && $coulmtype['FieldType'][$i] != 'text'){
@@ -222,17 +220,17 @@ function mysqli_get_foregin_key($con,$table,$field){
 
 
 
-function GetAllForeginKey_Info($con,$DB){
+function GetAllForeginKey_Info($DB){
         $AllFKObject = array();
         $itreation=0;
-        $Allforgeninfo = mysqli_query($con,"select concat(referenced_table_name, '.', referenced_column_name) as 'references'
+        $Allforgeninfo = mysqli_query("select concat(referenced_table_name, '.', referenced_column_name) as 'references'
         from
             information_schema.key_column_usage
         where
             referenced_table_name is not null
             and table_schema = '$DB'");
         while($row=mysqli_fetch_array($Allforgeninfo )){
-            $All_FK_TableName = @end(array_pop(explode('.', $row['references'])));
+            $All_FK_TableName = array_pop(explode('.', $row['references']));
             $All_FK_PrimaryID = substr($row['references'], 0, strrpos($row['references'], '.'));
             $CONECTTABLENAMEWITHFK = $All_FK_TableName.".".$All_FK_PrimaryID;
             if (!in_array($CONECTTABLENAMEWITHFK, $AllFKObject)) {
@@ -254,17 +252,17 @@ function GetForeginKey_TableName($con,$tablename,$fk){
         return $FKObject;
     }
 
-function GetForgienTablename_ForSpecific_Tablename($con,$tablename){
+function GetForgienTablename_ForSpecific_Tablename($tablename){
     $FKAllObject = array();
     $y=0;
-    $AllFKTableName = mysqli_query($con,"SELECT  ke.table_name ,ke.column_name FROM  information_schema.KEY_COLUMN_USAGE ke WHERE  ke.referenced_table_name ='$tablename' ORDER BY  ke.referenced_table_name");
-   
-    while($row = mysqli_fetch_array($AllFKTableName)){
+
+    $AllFKTableName = mysqli_query("SELECT  ke.table_name ,ke.column_name FROM  information_schema.KEY_COLUMN_USAGE ke WHERE  ke.referenced_table_name ='$tablename' ORDER BY  ke.referenced_table_name");
+    while(@$row=mysqli_fetch_array($AllFKTableName )){
             for ($i=0; $i < count($row) ; $i++) { 
-             $FKTableName = $row['table_name'];
-             $FKidName = $row['column_name'];
+             @$FKTableName = $row['table_name'];
+             @$FKidName = $row['column_name'];
                  if (!in_array($FKTableName.".".$FKidName, $FKAllObject)) {
-                  $FKAllObject[$y] = $FKTableName.".".$FKidName;
+                  @$FKAllObject[$y] = $FKTableName.".".$FKidName;
                   $y++;
                 }
             }
@@ -292,12 +290,13 @@ function GetUpdateCloumName($con,$table){
     }
 }
 
-function CheckconfigInfo($con){
+function CheckconfigInfo(){
 
     $configObject = [];
-    @$getallconfiginfo = mysqli_query($con,"SELECT * FROM `configuer_settings_genericadmin` WHERE `Config_id` = '1'");
+    @$getallconfiginfo = mysqli_query("SELECT * FROM `configuer_settings_genericadmin` WHERE `Config_id` = '1'");
     while (@$confrow = mysqli_fetch_array($getallconfiginfo)) {
 
+            
             $fieldname_image     = $confrow['fieldname_image'];
             $uploaddirectory     = $confrow['uploaddirectory'];
             $youtubefieldname    = $confrow['youtubefieldname'];
@@ -323,10 +322,10 @@ function CheckconfigInfo($con){
     return $configObject;
 }
 //start of pagination 
-function pagination($con,$query,$per_page=10,$page=1,$url='?',$tablename){   
+function pagination($query,$per_page=10,$page=1,$url='?',$tablename){   
 
     $query = "SELECT COUNT(*) as `num` FROM {$query}";
-    $row = mysqli_fetch_array(mysqli_query($con,$query));
+    $row = mysqli_fetch_array(mysqli_query($query));
     $total = $row['num'];
     $adjacents = "2"; 
      
@@ -415,62 +414,48 @@ function pagination($con,$query,$per_page=10,$page=1,$url='?',$tablename){
 //end of pagination 
 function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
 
-    $coulmtype  = GetCoulmsInfo($con,$table);
+    $coulmtype  = GetCoulmsInfo($table);
     $primryname = $coulmtype['FieldsName'][0];
     $page = (int)(!isset($_GET["page"]) ? 1 : $_GET["page"]);
+    $fkfieldname = mysqli_real_escape_string($_GET['fkfieldname']);
+    $relatedid   = mysqli_real_escape_string($_GET['relatedid']);
     if ($page <= 0) $page = 1;  
     $per_page = 10; // Set how many records do you want to display per page.  
     $startpoint = ($page * $per_page) - $per_page; 
-    $statement = "`$table` ORDER BY `$primryname` DESC"; // Change `records` according to your table name.
+    $statement = "`$table` WHERE `$fkfieldname`='$relatedid' ORDER BY `$primryname` DESC"; // Change `records` according to your table name.
     $columvalue = QueryResult($con,"SELECT * FROM {$statement} LIMIT {$startpoint} , {$per_page}");
     $counter = 0;
     $itreation_FK = 0;
     $limtbuttonrepeat = 0; 
     //get config info 
-    $confObj = CheckconfigInfo($con);
+    $confObj = CheckconfigInfo();
 
  
 
-   if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')){
-     $url = 'https://';
-   }else{
-      $url =  'http://';
-   }  
-
-    // Complete the URL
-    $url .= $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
-    if(preg_match('/authentication/',$url)){
-    }else{
-        $url .= '/authentication';
-    }
-
-// echo the URL
+    
     while($rowvalue=mysqli_fetch_row($columvalue)){
-        echo "<form method='POST' action='$url/deletequery.php' data-form='true' id='myform_$counter'><tr>";
+        echo "<form method='POST' action='inerdeletequery.php' data-form='true' id='myform_$counter'><tr>";
         //we check the length to make it fit with the table responsive
-
+        echo "<input type='hidden' name='fkfieldname' value='$fkfieldname' /><input type='hidden' name='relatedid' value='$relatedid' />";
         //append the radio button 
         echo "<td ><span id='hash'>#</span><input type='radio' name='showrelatedinfo' value='".$rowvalue[0]."' style='display:none;margin-top: -2px;opacity: 1;margin-left: 0px;position: inherit;'></td>";
         if (count($rowvalue) < 8) {        
             for($i = 0; $i < count($rowvalue) ; $i++) {
                     //get primry key for the fields less than 8 
                  $prima=mysqli_get_foregin_key($con,$table,$coulmtype['FieldsName'][$i]);
-
                 if($prima != ''){
                     //get FK tablename and primary key for the forgien key and the display name if exsist and its value
                     $FK = GetForeginKey_TableName($con,$table,$prima);
-                    $Tablename_FK  = substr($FK[$prima], 0, strpos($FK[$prima], '.'));
-
+                    $Tablename_FK  = substr($FK[$prima], 0, strpos($FK[$prima], '.'));               
                     // add the button to get all info for this primary key from the related table 
-                    $fktables = GetForgienTablename_ForSpecific_Tablename($con,$Tablename_FK); 
-                    $fktablesname = substr($fktables[$limtbuttonrepeat], 0, strpos($fktables[$limtbuttonrepeat], '.'));
-                    $fkidname =  end( explode( ".", $fktables[$limtbuttonrepeat] ));
-                   
+                    @$fktables = GetForgienTablename_ForSpecific_Tablename($table); 
+                    @$fktablesname = substr($fktables[$limtbuttonrepeat], 0, strpos($fktables[$limtbuttonrepeat], '.'));
+                    @$fkidname =  end( explode( ".", $fktables[$limtbuttonrepeat] ));
                     if($limtbuttonrepeat < count($fktables) && $fktablesname !=''){
-                       echo "<a id='displayrelatedrecords' onclick=\"window.open('$url/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
+                       echo "<a id='displayrelatedrecords' onclick=\"window.open('displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
                     }
                     $limtbuttonrepeat++;
-                    $PK_Name_For_FK = @end( explode( ".", $FK[$prima] ));
+                    $PK_Name_For_FK = end( explode( ".", $FK[$prima] ));
                     $FKNAME = $coulmtype['FieldsName'][$i];
                     $PK_Value_For_FK  = $rowvalue[$i];
                      if(!empty($Forgien_Key_Display_Field)){    
@@ -484,14 +469,14 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                         }else{
                             $FK_Query = QueryResult($con,"SELECT * FROM $Tablename_FK  WHERE `$PK_Name_For_FK` = '$PK_Value_For_FK' ");
                             while($FKRow = mysqli_fetch_array($FK_Query)){
-                                echo "<td>".substr($FKRow[0], 0, 60)."</td>";
+                                echo "<td>".substr($FKRow[0], 0, 100)."</td>";
                             }
                             echo "<input  type=\"hidden\" name=\"Tablename_FK\" prim_key=\"$PK_Value_For_FK\"  value=\"$Tablename_FK\">";                                                  
                         }//end of array has no value for this tablename 
                     }else{
                         $FK_Query = QueryResult($con,"SELECT * FROM $Tablename_FK  WHERE `$PK_Name_For_FK` = '$PK_Value_For_FK' ");
                         while($FKRow = mysqli_fetch_array($FK_Query)){
-                            echo "<td>".substr($FKRow[0], 0, 60)."</td>";
+                            echo "<td>".substr($FKRow[0], 0, 100)."</td>";
                         }
                         echo "<input  type=\"hidden\" name=\"Tablename_FK\" prim_key=\"$PK_Value_For_FK\"  value=\"$Tablename_FK\">";
                     }                        
@@ -526,24 +511,24 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
 
 
                     //check for youtube              
-                    if(preg_match('/'.$youtube.'/i',$coulmtype['FieldsName'][$i]) ){
+                    if(preg_match('/'.$youtube.'/',$coulmtype['FieldsName'][$i]) ){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><iframe src='$rowvalue[$i]' width='130' height='100' frameborder='0' scrolling='no' allowfullscreen></iframe></td>";
                         }else{
                                   echo "<td><img src='images/youtube.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$viedo.'/i',$coulmtype['FieldsName'][$i])){
+                    }else if(preg_match('/'.$viedo.'/',$coulmtype['FieldsName'][$i])){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><video width='320' height='240' controls><source src='$rowvalue[$i]' type='video/mp4'></video>  </td>";
                         }else{
                                   echo "<td><img src='images/video.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$images.'/i',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob" && $coulmtype['FieldType'][$i] != "text" ){
+                    }else if(preg_match('/'.$images.'/',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob" && $coulmtype['FieldType'][$i] != "text"){
                         //same code for the blob type but we check for the name incase the type is not blob
                         if($rowvalue[$i] == ''){
                             echo "<td><img src='images/default.png' style='width:80px;height:80px;border-radius: 10px;'/></td>";
                         }else{
-                            echo "<td><img src='$url/uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
+                            echo "<td><img src='uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
                         }
 
                     }else{
@@ -554,7 +539,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                                  echo "<td><img src='data:image/jpeg;base64,".base64_encode( $rowvalue[$i])."' style='width:80px;height:80px;border-radius: 10px;'/></td>";   
                             }
                         }else{
-                            echo "<td>".substr($rowvalue[$i], 0, 40)."</td>";
+                            echo "<td>".substr($rowvalue[$i], 0, 80)."</td>";
                         }
                     }                  
 
@@ -563,29 +548,27 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                 if($i==(count($rowvalue)-1)){
                     echo "<input  type='hidden' name='tablename' value='$table' />
                            <input  type='hidden' name='mainid' value='$rowvalue[0]' />";
-                    echo "<td><a onclick=\"window.open('$url/ineredit.php?tablename=$table&edit=$rowvalue[0]','Update Recors','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
+                    echo "<td><a onclick=\"window.open('inerineredit.php?tablename=$table&relatedinfo=$table&fkfieldname=$fkfieldname&relatedid=$relatedid&edit=$rowvalue[0]','Update Recors','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
                 }
             }
 
-        }else{   
+        }else{                
               for($i = 0; $i < 8 ; $i++) {
                 //get primry key for the fields less than 8 
                  $prima=mysqli_get_foregin_key($con,$table,$coulmtype['FieldsName'][$i]);
                 if($prima != ''){
-
                     //get FK tablename and primary key for the forgien key and the display name if exsist and its value
                     $FK = GetForeginKey_TableName($con,$table,$prima);
                     $Tablename_FK  = substr($FK[$prima], 0, strpos($FK[$prima], '.'));
                     // add the button to get all info for this primary key from the related table 
-
-                    $fktables = GetForgienTablename_ForSpecific_Tablename($con,$Tablename_FK); 
+                    @$fktables = GetForgienTablename_ForSpecific_Tablename($table); 
                     @$fktablesname = substr($fktables[$limtbuttonrepeat], 0, strpos($fktables[$limtbuttonrepeat], '.'));
                     @$fkidname =  end( explode( ".", $fktables[$limtbuttonrepeat] ));
                     if($limtbuttonrepeat < count($fktables) && $fktablesname !=''){
-                       echo "<a id='displayrelatedrecords' onclick=\"window.open('$url/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
+                       echo "<a id='displayrelatedrecords' onclick=\"window.open('displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
                     }
                     $limtbuttonrepeat++;
-                    $PK_Name_For_FK = @end( explode( ".", $FK[$prima] ) );
+                    $PK_Name_For_FK = end( explode( ".", $FK[$prima] ) );
                     $FKNAME = $coulmtype['FieldsName'][$i];
                     $PK_Value_For_FK  = $rowvalue[$i];
                      if(!empty($Forgien_Key_Display_Field)){
@@ -598,9 +581,9 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                             echo "<input  type=\"hidden\" name=\"Tablename_FK\" prim_key=\"$PK_Value_For_FK\" display_name=\"$FK_Field_Display\" value=\"$Tablename_FK\">";
                         }else{
 
-                            @$FK_Query = QueryResult($con,"SELECT * FROM $Tablename_FK  WHERE `$PK_Name_For_FK` = '$PK_Value_For_FK' ");
-                            while(@$FKRow = mysqli_fetch_array(@$FK_Query)){
-                                echo "<td>".substr($FKRow[0], 0, 60)."</td>";
+                            $FK_Query = QueryResult($con,"SELECT * FROM $Tablename_FK  WHERE `$PK_Name_For_FK` = '$PK_Value_For_FK' ");
+                            while($FKRow = mysqli_fetch_array($FK_Query)){
+                                echo "<td>".substr($FKRow[0], 0, 100)."</td>";
                             }
                             echo "<input  type=\"hidden\" name=\"Tablename_FK\" prim_key=\"$PK_Value_For_FK\"  value=\"$Tablename_FK\">";                                                  
                         }//end of array has no value for this tablename 
@@ -609,7 +592,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
 
                         $FK_Query = QueryResult($con,"SELECT * FROM $Tablename_FK  WHERE `$PK_Name_For_FK` = '$PK_Value_For_FK' ");
                         while($FKRow = mysqli_fetch_array($FK_Query)){
-                            echo "<td>".substr($FKRow[0], 0, 60)."</td>";
+                            echo "<td>".substr($FKRow[0], 0, 100)."</td>";
                         }
                         echo "<input  type=\"hidden\" name=\"Tablename_FK\" prim_key=\"$PK_Value_For_FK\"  value=\"$Tablename_FK\">";
                     }
@@ -641,25 +624,25 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                     }
                     
                       //check for youtube              
-                    if(preg_match('/'.$youtube.'/i',$coulmtype['FieldsName'][$i])){
+                    if(preg_match('/'.$youtube.'/',$coulmtype['FieldsName'][$i])){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><iframe src='$rowvalue[$i]' width='130' height='100' frameborder='0' scrolling='no' allowfullscreen></iframe></td>";
                         }else{
                                   echo "<td><img src='images/youtube.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$viedo.'/i',$coulmtype['FieldsName'][$i])){
+                    }else if(preg_match('/'.$viedo.'/',$coulmtype['FieldsName'][$i])){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><video width='320' height='240' controls><source src='$rowvalue[$i]' type='video/mp4'></video>  </td>";
                         }else{
                                   echo "<td><img src='images/video.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$images.'/i',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob"  && $coulmtype['FieldType'][$i] != "text"){
+                    }else if(preg_match('/'.$images.'/',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob"  && $coulmtype['FieldType'][$i] != "text"){
                         //same code for the blob type but we check for the name incase the type is not blob
                         if($rowvalue[$i] == ''){
                             echo "<td><img src='images/default.png' style='width:80px;height:80px;border-radius: 10px;'/></td>";
 
                         }else{
-                             echo "<td><img src='$url/uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
+                             echo "<td><img src='uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
                         }
 
                     }else{
@@ -670,7 +653,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                                  echo "<td><img src='data:image/jpeg;base64,".base64_encode( $rowvalue[$i])."' style='width:80px;height:80px;border-radius: 10px;'/></td>";    
                             }
                         }else{
-                            echo "<td>".substr($rowvalue[$i], 0, 40)."</td>";
+                            echo "<td>".substr($rowvalue[$i], 0, 80)."</td>";
                          }
                     }
                  }//end of primary key 
@@ -679,7 +662,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                 if($i==(8-1)){              
                    echo "<input  type='hidden' name='tablename' value='$table' />
                            <input  type='hidden' name='mainid' value='$rowvalue[0]' />
-                           <td><a onclick=\"window.open('$url/ineredit.php?tablename=$table&edit=$rowvalue[0]','Update Records','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
+                           <td><a onclick=\"window.open('inerineredit.php?tablename=$table&relatedinfo=$table&fkfieldname=$fkfieldname&relatedid=$relatedid&edit=$rowvalue[0]','Update Records','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
                 }
             }
 
@@ -691,19 +674,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
     }//end of while loop 
 
     // displaying paginaiton.
-    echo pagination($con,$statement,$per_page,$page,$url='?',$table);
-}
-
-function mysqli_result($res,$row=0,$col=0){ 
-    $numrows = mysqli_num_rows($res); 
-    if ($numrows && $row <= ($numrows-1) && $row >=0){
-        mysqli_data_seek($res,$row);
-        $resrow = (is_numeric($col)) ? mysqli_fetch_row($res) : mysqli_fetch_assoc($res);
-        if (isset($resrow[$col])){
-            return $resrow[$col];
-        }
-    }
-    return false;
+    echo pagination($statement,$per_page,$page,$url='?',$table);
 }
 
 function GetCoulmsInfo($con,$table){
@@ -711,7 +682,7 @@ $tableObject  =   array();
 $tablename    = $table;
 //get coulms number 
 $columname    = QueryResult($con,"SHOW COLUMNS FROM $tablename");
-$columnnumber = mysqli_num_rows($columname);
+@$columnnumber = mysqli_num_rows($columname);
 //end of get coulms number 
 //get coulm type and name 
 $columinfo    = QueryResult($con,"SELECT *  FROM $tablename ");
@@ -725,7 +696,7 @@ $OrginalDataType = QueryResult($con,"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WH
        $fieldtype[] =  $row['DATA_TYPE'];
     }
 //define varibal to get the ids for each tables columns  and store it in session 
-$primrykeyname = mysqli_fetch_field_direct($columinfo, 0)->name; 
+@$primrykeyname = mysqli_fetch_field_direct($columinfo, 0)->name; 
 $tableObject['FieldType']           = @$fieldtype;
 $tableObject['OrginalFieldType']    = @$orginalfieldtype;
 $tableObject['FieldsName']          = @$fieldsname;
@@ -735,6 +706,5 @@ $tableObject['columnnumber']        = @$columnnumber;
 return $tableObject;
 
 }
-
 
 ?>

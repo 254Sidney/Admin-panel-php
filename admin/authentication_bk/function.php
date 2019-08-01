@@ -181,7 +181,7 @@ function GetUserInfo($con){
         for ($i=0; $i < $cloumnnumber ; $i++) { 
             $fieldname =  $coulmtype['FieldsName'][$i];
 
-            if(preg_match('/'.$images.'/i',$fieldname) || preg_match('/image/',$fieldname)){
+            if(preg_match('/'.$images.'/',$fieldname) || preg_match('/image/',$fieldname)){
                 @$userimagename = $userrow[$i];
                 @$imagefieldtype = $coulmtype['OrginalFieldType'][$i];
             }else if($coulmtype['OrginalFieldType'][$i] == 'blob' && $coulmtype['FieldType'][$i] != 'text'){
@@ -254,17 +254,17 @@ function GetForeginKey_TableName($con,$tablename,$fk){
         return $FKObject;
     }
 
-function GetForgienTablename_ForSpecific_Tablename($con,$tablename){
+function GetForgienTablename_ForSpecific_Tablename($tablename){
     $FKAllObject = array();
     $y=0;
-    $AllFKTableName = mysqli_query($con,"SELECT  ke.table_name ,ke.column_name FROM  information_schema.KEY_COLUMN_USAGE ke WHERE  ke.referenced_table_name ='$tablename' ORDER BY  ke.referenced_table_name");
-   
-    while($row = mysqli_fetch_array($AllFKTableName)){
+
+    $AllFKTableName = mysqli_query("SELECT  ke.table_name ,ke.column_name FROM  information_schema.KEY_COLUMN_USAGE ke WHERE  ke.referenced_table_name ='$tablename' ORDER BY  ke.referenced_table_name");
+    while(@$row=mysqli_fetch_array($AllFKTableName )){
             for ($i=0; $i < count($row) ; $i++) { 
-             $FKTableName = $row['table_name'];
-             $FKidName = $row['column_name'];
+             @$FKTableName = $row['table_name'];
+             @$FKidName = $row['column_name'];
                  if (!in_array($FKTableName.".".$FKidName, $FKAllObject)) {
-                  $FKAllObject[$y] = $FKTableName.".".$FKidName;
+                  @$FKAllObject[$y] = $FKTableName.".".$FKidName;
                   $y++;
                 }
             }
@@ -431,22 +431,9 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
 
  
 
-   if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')){
-     $url = 'https://';
-   }else{
-      $url =  'http://';
-   }  
-
-    // Complete the URL
-    $url .= $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
-    if(preg_match('/authentication/',$url)){
-    }else{
-        $url .= '/authentication';
-    }
-
-// echo the URL
+    
     while($rowvalue=mysqli_fetch_row($columvalue)){
-        echo "<form method='POST' action='$url/deletequery.php' data-form='true' id='myform_$counter'><tr>";
+        echo "<form method='POST' action='authentication/deletequery.php' data-form='true' id='myform_$counter'><tr>";
         //we check the length to make it fit with the table responsive
 
         //append the radio button 
@@ -455,19 +442,16 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
             for($i = 0; $i < count($rowvalue) ; $i++) {
                     //get primry key for the fields less than 8 
                  $prima=mysqli_get_foregin_key($con,$table,$coulmtype['FieldsName'][$i]);
-
                 if($prima != ''){
                     //get FK tablename and primary key for the forgien key and the display name if exsist and its value
                     $FK = GetForeginKey_TableName($con,$table,$prima);
-                    $Tablename_FK  = substr($FK[$prima], 0, strpos($FK[$prima], '.'));
-
+                    $Tablename_FK  = substr($FK[$prima], 0, strpos($FK[$prima], '.'));               
                     // add the button to get all info for this primary key from the related table 
-                    $fktables = GetForgienTablename_ForSpecific_Tablename($con,$Tablename_FK); 
-                    $fktablesname = substr($fktables[$limtbuttonrepeat], 0, strpos($fktables[$limtbuttonrepeat], '.'));
-                    $fkidname =  end( explode( ".", $fktables[$limtbuttonrepeat] ));
-                   
+                    @$fktables = GetForgienTablename_ForSpecific_Tablename($table); 
+                    @$fktablesname = substr($fktables[$limtbuttonrepeat], 0, strpos($fktables[$limtbuttonrepeat], '.'));
+                    @$fkidname =  end( explode( ".", $fktables[$limtbuttonrepeat] ));
                     if($limtbuttonrepeat < count($fktables) && $fktablesname !=''){
-                       echo "<a id='displayrelatedrecords' onclick=\"window.open('$url/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
+                       echo "<a id='displayrelatedrecords' onclick=\"window.open('authentication/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
                     }
                     $limtbuttonrepeat++;
                     $PK_Name_For_FK = @end( explode( ".", $FK[$prima] ));
@@ -526,24 +510,24 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
 
 
                     //check for youtube              
-                    if(preg_match('/'.$youtube.'/i',$coulmtype['FieldsName'][$i]) ){
+                    if(preg_match('/'.$youtube.'/',$coulmtype['FieldsName'][$i]) ){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><iframe src='$rowvalue[$i]' width='130' height='100' frameborder='0' scrolling='no' allowfullscreen></iframe></td>";
                         }else{
                                   echo "<td><img src='images/youtube.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$viedo.'/i',$coulmtype['FieldsName'][$i])){
+                    }else if(preg_match('/'.$viedo.'/',$coulmtype['FieldsName'][$i])){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><video width='320' height='240' controls><source src='$rowvalue[$i]' type='video/mp4'></video>  </td>";
                         }else{
                                   echo "<td><img src='images/video.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$images.'/i',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob" && $coulmtype['FieldType'][$i] != "text" ){
+                    }else if(preg_match('/'.$images.'/',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob" && $coulmtype['FieldType'][$i] != "text" ){
                         //same code for the blob type but we check for the name incase the type is not blob
                         if($rowvalue[$i] == ''){
                             echo "<td><img src='images/default.png' style='width:80px;height:80px;border-radius: 10px;'/></td>";
                         }else{
-                            echo "<td><img src='$url/uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
+                            echo "<td><img src='authentication/uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
                         }
 
                     }else{
@@ -563,26 +547,24 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                 if($i==(count($rowvalue)-1)){
                     echo "<input  type='hidden' name='tablename' value='$table' />
                            <input  type='hidden' name='mainid' value='$rowvalue[0]' />";
-                    echo "<td><a onclick=\"window.open('$url/ineredit.php?tablename=$table&edit=$rowvalue[0]','Update Recors','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
+                    echo "<td><a onclick=\"window.open('authentication/ineredit.php?tablename=$table&edit=$rowvalue[0]','Update Recors','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
                 }
             }
 
-        }else{   
+        }else{                
               for($i = 0; $i < 8 ; $i++) {
                 //get primry key for the fields less than 8 
                  $prima=mysqli_get_foregin_key($con,$table,$coulmtype['FieldsName'][$i]);
                 if($prima != ''){
-
                     //get FK tablename and primary key for the forgien key and the display name if exsist and its value
                     $FK = GetForeginKey_TableName($con,$table,$prima);
                     $Tablename_FK  = substr($FK[$prima], 0, strpos($FK[$prima], '.'));
                     // add the button to get all info for this primary key from the related table 
-
-                    $fktables = GetForgienTablename_ForSpecific_Tablename($con,$Tablename_FK); 
+                    @$fktables = GetForgienTablename_ForSpecific_Tablename($table); 
                     @$fktablesname = substr($fktables[$limtbuttonrepeat], 0, strpos($fktables[$limtbuttonrepeat], '.'));
                     @$fkidname =  end( explode( ".", $fktables[$limtbuttonrepeat] ));
                     if($limtbuttonrepeat < count($fktables) && $fktablesname !=''){
-                       echo "<a id='displayrelatedrecords' onclick=\"window.open('$url/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
+                       echo "<a id='displayrelatedrecords' onclick=\"window.open('authentication/displayrelatedinfo.php?tablename=$table&relatedinfo=$fktablesname&fkfieldname=$fkidname&relatedid=$rowvalue[0]&true','Display Related Info','scrollbars=1,resizable=1,width=1200,height=640')\" style=\"cursor: pointer;margin-bottom:10px;margin-right:10px;display:none\" class='btn btn-info'>Display "." ".ucfirst($fktablesname)."</a> ";
                     }
                     $limtbuttonrepeat++;
                     $PK_Name_For_FK = @end( explode( ".", $FK[$prima] ) );
@@ -641,25 +623,25 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                     }
                     
                       //check for youtube              
-                    if(preg_match('/'.$youtube.'/i',$coulmtype['FieldsName'][$i])){
+                    if(preg_match('/'.$youtube.'/',$coulmtype['FieldsName'][$i])){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><iframe src='$rowvalue[$i]' width='130' height='100' frameborder='0' scrolling='no' allowfullscreen></iframe></td>";
                         }else{
                                   echo "<td><img src='images/youtube.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$viedo.'/i',$coulmtype['FieldsName'][$i])){
+                    }else if(preg_match('/'.$viedo.'/',$coulmtype['FieldsName'][$i])){
                         if(@$rowvalue[$i] !=''){
                                   echo"<td><video width='320' height='240' controls><source src='$rowvalue[$i]' type='video/mp4'></video>  </td>";
                         }else{
                                   echo "<td><img src='images/video.png' style='width:130px;height:80px;border-radius: 10px;'/></td>";
                         }
-                    }else if(preg_match('/'.$images.'/i',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob"  && $coulmtype['FieldType'][$i] != "text"){
+                    }else if(preg_match('/'.$images.'/',$coulmtype['FieldsName'][$i]) && $coulmtype['OrginalFieldType'][$i] != "blob"  && $coulmtype['FieldType'][$i] != "text"){
                         //same code for the blob type but we check for the name incase the type is not blob
                         if($rowvalue[$i] == ''){
                             echo "<td><img src='images/default.png' style='width:80px;height:80px;border-radius: 10px;'/></td>";
 
                         }else{
-                             echo "<td><img src='$url/uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
+                             echo "<td><img src='authentication/uploads/$rowvalue[$i]' style='width:80px;height:80px;border-radius: 10px;'/></td>";     
                         }
 
                     }else{
@@ -679,7 +661,7 @@ function GetcolumnValue($con,$table,$Forgien_Key_Display_Field){
                 if($i==(8-1)){              
                    echo "<input  type='hidden' name='tablename' value='$table' />
                            <input  type='hidden' name='mainid' value='$rowvalue[0]' />
-                           <td><a onclick=\"window.open('$url/ineredit.php?tablename=$table&edit=$rowvalue[0]','Update Records','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
+                           <td><a onclick=\"window.open('authentication/ineredit.php?tablename=$table&edit=$rowvalue[0]','Update Records','scrollbars=1,resizable=1,width=600,height=640')\" style=\"cursor: pointer;\">Edit</a></td><td><input  form='myform_$counter' type='submit' name='delete' value='Delete' class=\"btn btn-danger\"  style=\"cursor: pointer;\" /></td>";
                 }
             }
 

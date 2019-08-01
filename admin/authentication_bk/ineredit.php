@@ -96,7 +96,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
         if($confObj['fieldname_image'] != ''){
             $images  = str_replace('_', '', $confObj['fieldname_image']);
         }else{
-            $images  = 'image'; 
+            $images  = 'Image'; 
         }
 
         
@@ -104,7 +104,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
         if($confObj['uploaddirectory'] != ''){
             $uploads  = $confObj['uploaddirectory'];
         }else{
-            $uploads  = 'Uploads/'; 
+            $uploads  = 'uploads/'; 
         }
 
         if($confObj['youtubefieldname'] != ''){
@@ -129,7 +129,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
         $youtube = 'YouTube';
         $viedo   = 'Video';
         $images  = 'Image'; 
-        $uploads  = 'Uploads/';  
+        $uploads  = 'uploads/';  
         $password   = 'Password'; 
     }
 
@@ -244,7 +244,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				}else{
 
 					//check if contain you tube 
-					if(preg_match('/'.$youtube.'/i',$colum_update_name[$i])){
+					if(preg_match('/'.$youtube.'/',$colum_update_name[$i])){
 						echo "<div class='form-group' >
 								<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
 								<div class='col-sm-10'>";
@@ -257,15 +257,15 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 						echo   "</div>
 							   </div>";
 
-					}else if(preg_match('/'.$password.'/i',$colum_update_name[$i])){
+					}else if(preg_match('/'.$password.'/',$colum_update_name[$i])){
 						echo "<div class='form-group' >
 									<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
 									<div class='col-sm-10'>
-										<input value='$rowval[$i]' type='text'  name='$colum_update_name_no_replace[$i]'  class='form-control input-rounded' style='width: 60%;' />
+										<input type='password' placeholder='Password' name='$colum_update_name_no_replace[$i]' value='$rowval[$i]' class='form-control input-rounded' style='width: 60%;' />
 									</div>
 							   </div>";
 
-					}else if(preg_match('/'.$viedo.'/i',$colum_update_name[$i])){
+					}else if(preg_match('/'.$viedo.'/',$colum_update_name[$i])){
                         echo "<div class='form-group' >
 								<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
 								<div class='col-sm-10'>";
@@ -278,7 +278,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
                         	echo "</div>
                         		</div>";
 
-                    }else if(preg_match('/'.$images.'/i',$colum_update_name[$i])){
+                    }else if(preg_match('/'.$images.'/',$colum_update_name[$i])){
 						//same code for the blob type but we check for the name incase the type is not blob
                         if(@$rowval[$i] == ''){
 								echo "<div class='form-group'>
@@ -352,7 +352,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 								    <textarea class='form-control input-rounded' id='input-rounded' name='$colum_update_name_no_replace[$i]'>".@$rowval[$i]."</textarea>
 								</div>
 								</div>";
-						}else if( @$colum_update_type[$i] != 'text' && $colum_update_orginaltype[$i] =='blob' && !preg_match('/'.$images.'/i',$colum_update_name[$i])){
+						}else if( @$colum_update_type[$i] != 'text' && $colum_update_orginaltype[$i] =='blob' && !preg_match('/'.$images.'/',$colum_update_name[$i])){
 							if(@$rowval[$i] == ''){
 								echo "<div class='form-group'>
 								<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_update_name[$i]."</label>
@@ -431,12 +431,12 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 
 						}else{
 							
-							if(preg_match('/'.$password.'/i',$colum_update_name[$i])){
+							if(preg_match('/'.$password.'/',$colum_update_name[$i])){
 									// we need to check the forgien key and display name for them 
 								echo "<div class='form-group'>
 									<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_update_name[$i]."</label>
 									<div class='col-sm-10'>
-									    <input type='text' class='form-control input-rounded' name='$colum_update_name_no_replace[$i]' value='".@$rowval[$i]."' id='input-rounded'>
+									    <input type='password' class='form-control input-rounded' name='$colum_update_name_no_replace[$i]' value='".@$rowval[$i]."' id='input-rounded'>
 									</div>
 									</div>";
 
@@ -493,17 +493,8 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 					foreach ($_POST as $key => $value) {
 						if ($key != 'updaterecords') {
 							//check if this is the last value and key 
-							if (preg_match('/'.$password.'/i',$key)){
-								$table = $_GET['tablename'];
-								$getorginalpass = mysqli_query($con,"SELECT $key FROM $table WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ");
-								$pass = mysqli_result($getorginalpass, 0 ,$key);
-								if($pass == $value){
-									$value = $pass;
-								}else{
-									$value = sha1($value);
-								}
-
-								
+							if (preg_match('/'.$password.'/',$key)){
+								$value = sha1($value);
 							}
 							if($i == $post_length -2){
 								//build update query 
@@ -520,15 +511,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				}else{  // we have posted or uploaded images 
 					foreach ($_POST as $key => $value) {
 						if ($key != 'updaterecords') {
-							if (preg_match('/'.$password.'/i',$key)){
-								$table = $_GET['tablename'];
-								$getorginalpass = mysqli_query($con,"SELECT $key FROM $table WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ");
-								$pass = mysqli_result($getorginalpass, 0 ,$key);
-								if($pass == $value){
-									$value = $pass;
-								}else{
-									$value = sha1($value);
-								}
+							if (preg_match('/'.$password.'/',$key)){
 								$value = sha1($value);
 							}
 							//check if this is the last value and key 
@@ -580,15 +563,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				//append all fields with the query without images fields 
 				foreach ($_POST as $key => $value) {
 					if ($key != 'updaterecords') {
-						if (preg_match('/'.$password.'/i',$key)){
-							$table = $_GET['tablename'];
-								$getorginalpass = mysqli_query($con,"SELECT $key FROM $table WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ");
-								$pass = mysqli_result($getorginalpass, 0 ,$key);
-								if($pass == $value){
-									$value = $pass;
-								}else{
-									$value = sha1($value);
-								}
+						if (preg_match('/'.$password.'/',$key)){
 								$value = sha1($value);
 							}
 						//check if this is the last value and key 

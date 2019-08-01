@@ -1,1 +1,1 @@
-<?php $Forgien_Key_Display_Field = array('categories' =>'CatName','users' =>'UserName')?>
+<?php $Forgien_Key_Display_Field = array('categories' =>'cat_name','countries' =>'country_name','sizes' =>'size')?>

@@ -220,7 +220,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 			}else{		//end of the field now is one of the forgien keys
 
 				//check if contain youtube  by field name
-                if(preg_match('/'.$youtube.'/i',$colum_submit_name[$i])){
+                if(preg_match('/'.$youtube.'/',$colum_submit_name[$i])){
 					echo "<div class='form-group' >
 							<label for='input-rounded' class='col-sm-2 control-label'>".$colum_submit_name[$i]."</label>
 							<div class='col-sm-10'>
@@ -229,14 +229,14 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 							</div>
 						  </div>";
 
-                }else if(preg_match('/'.$password.'/i',$colum_submit_name[$i])){
+                }else if(preg_match('/'.$password.'/',$colum_submit_name[$i])){
 					echo "<div class='form-group' >
 							<label for='input-rounded' class='col-sm-2 control-label'>".$colum_submit_name[$i]."</label>
 							<div class='col-sm-10'><input type='password' placeholder='password' name='$colum_submit_name_no_replace[$i]' class='form-control input-rounded' style='width: 60%;'/>
 							</div>
 						  </div>";
 
-                }else if(preg_match('/'.$viedo.'/i',$colum_submit_name[$i])){
+                }else if(preg_match('/'.$viedo.'/',$colum_submit_name[$i])){
                         echo "<div class='form-group' >
 								<label for='input-rounded' class='col-sm-2 control-label'>".$colum_submit_name[$i]."</label>
 								<div class='col-sm-10'>";
@@ -247,7 +247,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
                         	echo "</div>
 							   </div>";
 
-                }else if(preg_match('/'.$images.'/i',$colum_submit_name[$i]) || preg_match('/image/',$colum_submit_name[$i])){
+                }else if(preg_match('/'.$images.'/',$colum_submit_name[$i]) || preg_match('/image/',$colum_submit_name[$i])){
 						 //same code for the blob type but we check for the name incase the type is not blob                    
 							echo "<div class='form-group'>
 								<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_submit_name[$i]."</label>
@@ -312,7 +312,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 								    <textarea class='form-control input-rounded' id='input-rounded' name='$colum_submit_name_no_replace[$i]'></textarea>
 								</div>
 								</div>";
-						}else if(@$colum_submit_type[$i] != 'text' && $colum_submit_orginaltype[$i] =='blob' && !preg_match('/'.$images.'/i',$colum_submit_name[$i])){
+						}else if(@$colum_submit_type[$i] != 'text' && $colum_submit_orginaltype[$i] =='blob' && !preg_match('/'.$images.'/',$colum_submit_name[$i])){
 								echo "<div class='form-group'>
 								<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_submit_name[$i]."</label>
 								<div class='col-sm-10'>
@@ -382,7 +382,7 @@ if (isset($_GET['tablename']) && isset($_GET['newrecord']) ) {
 
 						}else{
 							// we need to check the forgien key and display name for them 
-							if(preg_match('/'.$password.'/i',$colum_submit_name[$i])){
+							if(preg_match('/'.$password.'/',$colum_submit_name[$i])){
 								echo "<div class='form-group'>
 									<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_submit_name[$i]."</label>
 									<div class='col-sm-10'>
@@ -458,7 +458,7 @@ if (isset($_POST['submitrecords'])) {
 			//append all values with the query from the post 
 			foreach ($_POST as $key => $value) {
 				if ($key != 'submitrecords') {	
-						if (preg_match('/'.$password.'/i',$key)){
+						if (preg_match('/'.$password.'/',$key)){
 							$value = sha1($value);
 							$submit_query .= " '$value' , ";
 						}else{
@@ -512,7 +512,7 @@ if (isset($_POST['submitrecords'])) {
 			//append all values with the query without images fields 
 			foreach ($_POST as $key => $value) {
 				if ($key != 'submitrecords') {
-					if (preg_match('/'.$password.'/i',$key)){
+					if (preg_match('/'.$password.'/',$key)){
 						$value = sha1($value);
 					}
 					//check if this is the last value and key 

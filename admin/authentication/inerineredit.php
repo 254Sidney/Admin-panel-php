@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-
 	        <title>Dynamic | Admin Dashboard </title>
         
         <meta content="width=device-width, initial-scale=1" name="viewport"/>
@@ -9,7 +8,6 @@
         <meta name="description" content="Admin Dashboard Template" />
         <meta name="keywords" content="admin,dashboard,generic,dynamic admin,php admin,website content mangment,CRM, PHP CRM , generic mangment , free admin, free website admin, free website php admin, free generic admin " />
         <meta name="author" content="ali alroomi" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	    <link href='../../assets/css/css.css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
         <link href="../../assets/plugins/pace-master/themes/blue/pace-theme-flash.css" rel="stylesheet"/>
         <link href="../../assets/plugins/uniform/css/uniform.default.min.css" rel="stylesheet"/>
@@ -50,6 +48,10 @@
 				width: 60%;
 
 			}
+
+			.btn-primary {
+				margin-top: 15px;
+			}
         </style>
 
         <script type="text/javascript">	
@@ -73,15 +75,15 @@ include 'FK_Config.php';
 
 if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 	# code...
-	$tablename = mysqli_real_escape_string($con,$_GET['tablename']);
-	$PrimID    = mysqli_real_escape_string($con,$_GET['edit']);
+	$tablename = mysql_real_escape_string($_GET['tablename']);
+	$PrimID    = mysql_real_escape_string($_GET['edit']);
 
 	echo "<div id='table_title' >
 	<h1 style='margin-left: 14px;color:#4E5E6A;'>".strtoupper($tablename)."</h1>
 	</div><table>";
 	
 
-	$table_update_info      		=  GetCoulmsInfo($con,$tablename);
+	$table_update_info      		=  GetCoulmsInfo($tablename);
 	@$PrimryKey_DisplayName 		=   $table_update_info['FieldsName'][0];
 	@$colum_update_name_no_replace  =   $table_update_info['FieldsName'];
 	@$colum_update_name     		=  str_replace('_', ' ', $table_update_info['FieldsName']);
@@ -89,22 +91,32 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 	@$colum_update_orginaltype      = $table_update_info['OrginalFieldType'];
 	@$colum_update_number   		=  $table_update_info['columnnumber'];
 
+
+	$fkfieldname   					= mysql_real_escape_string($_GET['fkfieldname']);
+	$relatedid						= mysql_real_escape_string($_GET['relatedid']);
+
 	//get all config info if exsist 
-	@$confObj = CheckconfigInfo($con);
+	@$confObj = CheckconfigInfo();
 	//prepare the variables for youtube and viedo and images 
     if(count($confObj) > 0){
+
         if($confObj['fieldname_image'] != ''){
             $images  = str_replace('_', '', $confObj['fieldname_image']);
         }else{
-            $images  = 'image'; 
+            $images  = 'Image'; 
         }
 
+        if($confObj['passwordfieldname'] != ''){
+            $password   = str_replace('_', '', $confObj['passwordfieldname']);
+        }else{
+            $password   = 'Password';
+        }
         
 
         if($confObj['uploaddirectory'] != ''){
             $uploads  = $confObj['uploaddirectory'];
         }else{
-            $uploads  = 'Uploads/'; 
+            $uploads  = 'uploads/'; 
         }
 
         if($confObj['youtubefieldname'] != ''){
@@ -119,42 +131,35 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
             $viedo   = 'Video';
         }
 
-        if($confObj['passwordfieldname'] != ''){
-            $password   = str_replace('_', '', $confObj['passwordfieldname']);
-        }else{
-            $password   = 'Password';
-        }
-
     }else{
-        $youtube = 'YouTube';
-        $viedo   = 'Video';
-        $images  = 'Image'; 
-        $uploads  = 'Uploads/';  
-        $password   = 'Password'; 
+        $youtube 	= 'YouTube';
+        $viedo   	= 'Video';
+        $images  	= 'Image';   
+        $uploads  	= 'uploads/'; 
+        $password   = 'Password';
     }
-
-
 	//get all info for the table 
-	$columvalue = mysqli_query($con,"SELECT * FROM $tablename WHERE `$PrimryKey_DisplayName` = '$PrimID'");
+	$columvalue = mysql_query("SELECT * FROM $tablename WHERE `$PrimryKey_DisplayName` = '$PrimID'");
 
-	while ($rowval = mysqli_fetch_array($columvalue)) {
+	while ($rowval = mysql_fetch_array($columvalue)) {
 		
 	
 	//get the value of the primry key and draw the update form 
 	//draw the form update
 	for ($i=0; $i <= @$colum_update_number-1; $i++) { 
+
 			if($colum_update_name_no_replace[$i] != @$PrimryKey_DisplayName ){
 
 				//check if there is forgien key 
-				$FK=mysqli_get_foregin_key($con,$tablename,$table_update_info['FieldsName'][$i]);
+				$FK=mysql_get_foregin_key($tablename,$table_update_info['FieldsName'][$i]);
 				if($FK != '' && $colum_update_name_no_replace[$i] == $FK ){
 
 					//get table name for the fk and select * from table by field name if exsist 
 					//databas name to get all FK
 					$FK_Fields_Name   = $colum_update_name_no_replace[$i];
-                    $All_FK_TableName = GetForeginKey_TableName($con,$tablename,$FK);
+                    $All_FK_TableName = GetForeginKey_TableName($tablename,$FK);
                     $Tablename_FK     = substr($All_FK_TableName[$FK_Fields_Name], 0, strpos($All_FK_TableName[$FK_Fields_Name], '.'));
-                    $PK_Name_For_FK   = @end( explode( ".", $All_FK_TableName[$FK_Fields_Name] ));              
+                    $PK_Name_For_FK   = end( explode( ".", $All_FK_TableName[$FK_Fields_Name] ) );              
                     //$FK_PK            = GetCoulmsInfo($Tablename_FK);
                     $FKPrimID = $rowval[$i];                  
                     //get * from this table if display name if empty
@@ -164,12 +169,12 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
                     	if(array_key_exists($Tablename_FK, $Forgien_Key_Display_Field)){
                     		$FK_Field_Display = $Forgien_Key_Display_Field[$Tablename_FK];	
 	                    	//get the value that already selected in the main table 
-	                    	$FK_Selected_Value_Query  = mysqli_query($con,"SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` ='$FKPrimID' ");
-		    				  while ($FK_Row = mysqli_fetch_array($FK_Selected_Value_Query)) {
+	                    	$FK_Selected_Value_Query  = mysql_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` ='$FKPrimID' ");
+		    				  while ($FK_Row = mysql_fetch_array($FK_Selected_Value_Query)) {
 		    				  		$Selected_Value = $FK_Row[$FK_Field_Display];
 		    				  }
 		    				//get the rest of value 
-		    				$FK_Select_All_Value_Query  = mysqli_query($con,"SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` !='$FKPrimID' ");
+		    				$FK_Select_All_Value_Query  = mysql_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` !='$FKPrimID' ");
 		    				//append the value in dropdown and then append the rest 
 		    				echo "<div class='form-group' >
 									<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
@@ -177,7 +182,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 									    <select name='$colum_update_name_no_replace[$i]' id='$colum_update_name_no_replace[$i]' >
 									    <option value='$FKPrimID' selected='selected'>$Selected_Value</option>";
 									    //now get the rest of value from the same table 
-									while ($RestOfValue = mysqli_fetch_array($FK_Select_All_Value_Query)) {
+									while ($RestOfValue = mysql_fetch_array($FK_Select_All_Value_Query)) {
 										$Selected_Value = $RestOfValue[$FK_Field_Display];
 										$FK_ID          = $RestOfValue[$PK_Name_For_FK];
 										echo "<option value='$FK_ID' >$Selected_Value</option>";
@@ -190,12 +195,12 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 							}else{  //not in array 
 
 								//get the value that already selected in the main table 
-		                    	$FK_Selected_Value_Query  = mysqli_query($con,"SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` ='$FKPrimID' ");
-			    				  while ($FK_Row = mysqli_fetch_array($FK_Selected_Value_Query)) {
+		                    	$FK_Selected_Value_Query  = mysql_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` ='$FKPrimID' ");
+			    				  while ($FK_Row = mysql_fetch_array($FK_Selected_Value_Query)) {
 			    				  		$Selected_Value = $FK_Row[0];
 			    				  }
 			    				//get the rest of value 
-			    				$FK_Select_All_Value_Query  = mysqli_query($con,"SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` !='$FKPrimID' ");
+			    				$FK_Select_All_Value_Query  = mysql_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` !='$FKPrimID' ");
 			    				//append the value in dropdown and then append the rest 
 			    				echo "<div class='form-group' >
 										<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
@@ -203,7 +208,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 										    <select name='$colum_update_name_no_replace[$i]' id='$colum_update_name_no_replace[$i]' >
 										    <option value='$FKPrimID' selected='selected'>$Selected_Value</option>";
 										    //now get the rest of value from the same table 
-										while ($RestOfValue = mysqli_fetch_array($FK_Select_All_Value_Query)) {
+										while ($RestOfValue = mysql_fetch_array($FK_Select_All_Value_Query)) {
 											$Selected_Value = $RestOfValue[0];
 											$FK_ID          = $RestOfValue[0];
 											echo "<option value='$FK_ID' >$Selected_Value</option>";
@@ -216,12 +221,12 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 
                     }else{
                     	//get the value that already selected in the main table 
-                    	$FK_Selected_Value_Query  = mysqli_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` ='$FKPrimID' ");
-	    				  while ($FK_Row = mysqli_fetch_array($FK_Selected_Value_Query)) {
+                    	$FK_Selected_Value_Query  = mysql_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` ='$FKPrimID' ");
+	    				  while ($FK_Row = mysql_fetch_array($FK_Selected_Value_Query)) {
 	    				  		$Selected_Value = $FK_Row[0];
 	    				  }
 	    				//get the rest of value 
-	    				$FK_Select_All_Value_Query  = mysqli_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` !='$FKPrimID' ");
+	    				$FK_Select_All_Value_Query  = mysql_query("SELECT * FROM  $Tablename_FK WHERE `$PK_Name_For_FK` !='$FKPrimID' ");
 	    				//append the value in dropdown and then append the rest 
 	    				echo "<div class='form-group' >
 								<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
@@ -229,7 +234,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 								    <select name='$colum_update_name_no_replace[$i]' id='$colum_update_name_no_replace[$i]' >
 								    <option value='$FKPrimID' selected='selected'>$Selected_Value</option>";
 								    //now get the rest of value from the same table 
-								while ($RestOfValue = mysqli_fetch_array($FK_Select_All_Value_Query)) {
+								while ($RestOfValue = mysql_fetch_array($FK_Select_All_Value_Query)) {
 									$Selected_Value = $RestOfValue[0];
 									$FK_ID          = $RestOfValue[0];
 									echo "<option value='$FK_ID' >$Selected_Value</option>";
@@ -244,7 +249,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				}else{
 
 					//check if contain you tube 
-					if(preg_match('/'.$youtube.'/i',$colum_update_name[$i])){
+					if(preg_match('/'.$youtube.'/',$colum_update_name[$i])){
 						echo "<div class='form-group' >
 								<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
 								<div class='col-sm-10'>";
@@ -257,15 +262,15 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 						echo   "</div>
 							   </div>";
 
-					}else if(preg_match('/'.$password.'/i',$colum_update_name[$i])){
+					}else if(preg_match('/'.$password.'/',$colum_update_name[$i])){
 						echo "<div class='form-group' >
 									<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
 									<div class='col-sm-10'>
-										<input value='$rowval[$i]' type='text'  name='$colum_update_name_no_replace[$i]'  class='form-control input-rounded' style='width: 60%;' />
+										<input type='password' placeholder='Password' name='$colum_update_name_no_replace[$i]' value='$rowval[$i]' class='form-control input-rounded' style='width: 60%;' />
 									</div>
 							   </div>";
 
-					}else if(preg_match('/'.$viedo.'/i',$colum_update_name[$i])){
+					}else if(preg_match('/'.$viedo.'/',$colum_update_name[$i])){
                         echo "<div class='form-group' >
 								<label for='input-rounded' class='col-sm-2 control-label'>".$colum_update_name[$i]."</label>
 								<div class='col-sm-10'>";
@@ -276,9 +281,9 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
                        		}
 
                         	echo "</div>
-                        		</div>";
+							   </div>";
 
-                    }else if(preg_match('/'.$images.'/i',$colum_update_name[$i])){
+                    }else if(preg_match('/'.$images.'/',$colum_update_name[$i])){
 						//same code for the blob type but we check for the name incase the type is not blob
                         if(@$rowval[$i] == ''){
 								echo "<div class='form-group'>
@@ -352,7 +357,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 								    <textarea class='form-control input-rounded' id='input-rounded' name='$colum_update_name_no_replace[$i]'>".@$rowval[$i]."</textarea>
 								</div>
 								</div>";
-						}else if( @$colum_update_type[$i] != 'text' && $colum_update_orginaltype[$i] =='blob' && !preg_match('/'.$images.'/i',$colum_update_name[$i])){
+						}else if(@$colum_update_type[$i] != 'text' && $colum_update_orginaltype[$i] =='blob' && !preg_match('/'.$images.'/',$colum_update_name[$i])){
 							if(@$rowval[$i] == ''){
 								echo "<div class='form-group'>
 								<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_update_name[$i]."</label>
@@ -430,16 +435,14 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 									<div id='dtBox'></div>";
 
 						}else{
-							
-							if(preg_match('/'.$password.'/i',$colum_update_name[$i])){
+							if(preg_match('/'.$password.'/',$colum_update_name[$i])){
 									// we need to check the forgien key and display name for them 
 								echo "<div class='form-group'>
 									<label for='input-rounded' class='col-sm-2 control-label'>".@$colum_update_name[$i]."</label>
 									<div class='col-sm-10'>
-									    <input type='text' class='form-control input-rounded' name='$colum_update_name_no_replace[$i]' value='".@$rowval[$i]."' id='input-rounded'>
+									    <input type='password' class='form-control input-rounded' name='$colum_update_name_no_replace[$i]' value='".@$rowval[$i]."' id='input-rounded'>
 									</div>
 									</div>";
-
 							}else{
 								// we need to check the forgien key and display name for them 
 								echo "<div class='form-group'>
@@ -448,9 +451,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 									    <input type='text' class='form-control input-rounded' name='$colum_update_name_no_replace[$i]' value='".@$rowval[$i]."' id='input-rounded'>
 									</div>
 									</div>";
-
 							}
-							
 						}//end of type not text or blob 
 
 
@@ -492,19 +493,10 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				if($file_length < 0 ){  // no images uploaded or post 
 					foreach ($_POST as $key => $value) {
 						if ($key != 'updaterecords') {
-							//check if this is the last value and key 
-							if (preg_match('/'.$password.'/i',$key)){
-								$table = $_GET['tablename'];
-								$getorginalpass = mysqli_query($con,"SELECT $key FROM $table WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ");
-								$pass = mysqli_result($getorginalpass, 0 ,$key);
-								if($pass == $value){
-									$value = $pass;
-								}else{
-									$value = sha1($value);
-								}
-
-								
+							if (preg_match('/'.$password.'/',$key)){
+								$value = sha1($value);
 							}
+							//check if this is the last value and key 
 							if($i == $post_length -2){
 								//build update query 
 								$update_query .= "`".$key . "` = '" . $value . "'  ";
@@ -520,15 +512,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				}else{  // we have posted or uploaded images 
 					foreach ($_POST as $key => $value) {
 						if ($key != 'updaterecords') {
-							if (preg_match('/'.$password.'/i',$key)){
-								$table = $_GET['tablename'];
-								$getorginalpass = mysqli_query($con,"SELECT $key FROM $table WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ");
-								$pass = mysqli_result($getorginalpass, 0 ,$key);
-								if($pass == $value){
-									$value = $pass;
-								}else{
-									$value = sha1($value);
-								}
+							if (preg_match('/'.$password.'/',$key)){
 								$value = sha1($value);
 							}
 							//check if this is the last value and key 
@@ -548,7 +532,7 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				
 				//bild the query with images field 
 				foreach ($_FILES as $key => $value) {	
-					 $value = mysqli_real_escape_string($con,$value['name']);	 
+					 $value = mysql_real_escape_string($value['name']);	 
 					 //convert to blob 
 					 if($value !=''){
 					 	//check if normal upload or blob upload 
@@ -580,17 +564,9 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 				//append all fields with the query without images fields 
 				foreach ($_POST as $key => $value) {
 					if ($key != 'updaterecords') {
-						if (preg_match('/'.$password.'/i',$key)){
-							$table = $_GET['tablename'];
-								$getorginalpass = mysqli_query($con,"SELECT $key FROM $table WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ");
-								$pass = mysqli_result($getorginalpass, 0 ,$key);
-								if($pass == $value){
-									$value = $pass;
-								}else{
-									$value = sha1($value);
-								}
+						if (preg_match('/'.$password.'/',$key)){
 								$value = sha1($value);
-							}
+						}
 						//check if this is the last value and key 
 						if($i == $post_length -2){
 							//build update query 
@@ -606,13 +582,13 @@ if (isset($_GET['tablename']) && isset($_GET['edit'])) {
 		//end of check image		
 		@$update_query .= "WHERE `$PrimryKey_DisplayName` = '" . $PrimID . "' ";	
 		//end of build the genric update query 
-		@$excute_update_query = mysqli_query($con,@$update_query);
-		if(!mysqli_query($con,@$update_query)){
-		 	 mysqli_error();
+		@$excute_update_query = mysqli_query(@$update_query);
+		if(!mysql_query(@$update_query)){
+		 	 mysql_error();
 		}else{
 			echo "<script>					
 					window.opener.location.reload(true);
-					window.opener.location ='../index.php?tablename=$tablename&Updated';
+					window.opener.location ='displayrelatedinfo.php?tablename=$tablename&relatedinfo=$tablename&fkfieldname=$fkfieldname&relatedid=$relatedid&true&Updated';
 			        window.close();
 				 </script>";			
 		}
